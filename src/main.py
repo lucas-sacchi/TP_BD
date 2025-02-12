@@ -1,7 +1,10 @@
-from database import engine, SessionLocal, Base
+from database import engine, SessionLocal, Base, create_database
 from models import Cliente, Carro, Agencia, Funcionario, Contrato, Manutencao
 from repository import Repositorio
 from popula_bd import popular_banco  # Importa a função de popular o banco
+
+# Criar o banco de dados caso não exista
+create_database()
 
 # Criar as tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
