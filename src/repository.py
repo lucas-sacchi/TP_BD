@@ -1,98 +1,70 @@
-from database import SessionLocal
-from models import Cliente, Carro, Agencia, Funcionario, Contrato, Manutencao
+from database import get_connection
 
 class Repositorio:
-    def __init__(self):
-        self.db = SessionLocal()
+    def adicionar(self, tabela, dados):
+        connection = get_connection()
+        cursor = connection.cursor()
+        
+        colunas = ', '.join(dados.keys())
+        valores = ', '.join(['%s'] * len(dados))
+        sql = f"INSERT INTO {tabela} ({colunas}) VALUES ({valores})"
+        
+        cursor.execute(sql, tuple(dados.values()))
+        connection.commit()
+        cursor.close()
+        connection.close()
 
-    def adicionar(self, objeto):
-        """Adiciona um objeto ao banco de dados."""
-        self.db.add(objeto)
-        self.db.commit()
-        self.db.refresh(objeto)
+    def listar(self, tabela):
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+        
+        cursor.execute(f"SELECT * FROM {tabela}")
+        registros = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        return registros
 
+    def remover(self, tabela, coluna_id, id_valor):
+        connection = get_connection()
+        cursor = connection.cursor()
+        
+        cursor.execute(f"DELETE FROM {tabela} WHERE {coluna_id} = %s", (id_valor,))
+        connection.commit()
+        
+        cursor.close()
+        connection.close()
 
-    def listar(self, tipo):
-        """Lista objetos do banco de dados."""
-        modelo = {
-            "cliente": Cliente,
-            "carro": Carro,
-            "agencia": Agencia,
-            "funcionario": Funcionario,
-            "contrato": Contrato,
-            "manutencao": Manutencao
-        }.get(tipo)
+    def atualizar(self, tabela, id_valor, **dados):
+        """Atualiza um registro na tabela especificada."""
+        connection = get_connection()
+        cursor = connection.cursor()
 
-        if modelo:
-            try:
-                objetos = self.db.query(modelo).all()
-                if objetos:
-                    print(f"Listando {len(objetos)} {tipo}s")
-                    for obj in objetos:
-                        print(obj)
-                else:
-                    print(f"Nenhum {tipo} encontrado.")
-                return objetos
-            except Exception as e:
-                print(f"Erro ao listar {tipo}: {e}")
-                raise
-        else:
-            print("Tipo inválido.")
-            return []
+        if not dados:
+            print("Nenhum dado para atualizar.")
+            return
 
-    def remover(self, tipo, id_obj):
-        """Remove um objeto do banco de dados."""
-        modelo = {
-            "cliente": Cliente,
-            "carro": Carro,
-            "agencia": Agencia,
-            "funcionario": Funcionario,
-            "contrato": Contrato,
-            "manutencao": Manutencao
-        }.get(tipo)
+        updates = ', '.join([f"{coluna} = %s" for coluna in dados.keys()])
 
-        if modelo:
-            try:
-                # Aqui, utilizamos a chave correta para a tabela
-                objeto = self.db.query(modelo).filter_by(**{f"id_{tipo}": id_obj}).first()
-                if objeto:
-                    self.db.delete(objeto)
-                    self.db.commit()
-                    print(f"{tipo.capitalize()} {id_obj} removido com sucesso.")
-                else:
-                    print(f"{tipo.capitalize()} {id_obj} não encontrado.")
-            except Exception as e:
-                self.db.rollback()
-                print(f"Erro ao remover {tipo}: {e}")
-                raise
-        else:
-            print("Tipo inválido.")
+        # Definição correta da chave primária
+        chaves_primarias = {
+            "clientes": "id_cliente",
+            "carros": "id_carro",
+            "agencias": "id_agencia",
+            "funcionarios": "id_funcionario",
+            "contratos": "id_contrato",
+            "manutencoes": "id_manutencao"
+        }
 
-    def atualizar(self, tipo, id_obj, **kwargs):
-        """Atualiza atributos de um objeto no banco de dados."""
-        modelo = {
-            "cliente": Cliente,
-            "carro": Carro,
-            "agencia": Agencia,
-            "funcionario": Funcionario,
-            "contrato": Contrato,
-            "manutencao": Manutencao
-        }.get(tipo)
+        coluna_id = chaves_primarias.get(tabela, f"id_{tabela[:-1]}")  # Usa o dicionário para definir a chave primária
 
-        if modelo:
-            try:
-                # Aqui, utilizamos a chave correta para a tabela
-                objeto = self.db.query(modelo).filter_by(**{f"id_{tipo}": id_obj}).first()
-                if objeto:
-                    for key, value in kwargs.items():
-                        setattr(objeto, key, value)
-                    self.db.commit()
-                    print(f"{tipo.capitalize()} {id_obj} atualizado com sucesso.")
-                else:
-                    print(f"{tipo.capitalize()} {id_obj} não encontrado.")
-            except Exception as e:
-                self.db.rollback()
-                print(f"Erro ao atualizar {tipo}: {e}")
-                raise
-        else:
-            print("Tipo inválido.")
+        sql = f"UPDATE {tabela} SET {updates} WHERE {coluna_id} = %s"
+        valores = tuple(dados.values()) + (id_valor,)
+
+        cursor.execute(sql, valores)
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+        print(f"Registro atualizado na tabela {tabela}.")
+

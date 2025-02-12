@@ -1,82 +1,113 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, Date
-from sqlalchemy.orm import relationship
-from database import Base
+class Cliente:
+    def __init__(self, id_cliente=None, nome=None, cpf=None, telefone=None, email=None, endereco=None):
+        self.id_cliente = id_cliente
+        self.nome = nome
+        self.cpf = cpf
+        self.telefone = telefone
+        self.email = email
+        self.endereco = endereco
+    
+    def to_dict(self):
+        return {
+            "id_cliente": self.id_cliente,
+            "nome": self.nome,
+            "cpf": self.cpf,
+            "telefone": self.telefone,
+            "email": self.email,
+            "endereco": self.endereco
+        }
 
-class Cliente(Base):
-    __tablename__ = "clientes"
+class Carro:
+    def __init__(self, id_carro=None, modelo=None, marca=None, placa=None, ano=None, categoria=None, quilometragem=None):
+        self.id_carro = id_carro
+        self.modelo = modelo
+        self.marca = marca
+        self.placa = placa
+        self.ano = ano
+        self.categoria = categoria
+        self.quilometragem = quilometragem
+    
+    def to_dict(self):
+        return {
+            "id_carro": self.id_carro,
+            "modelo": self.modelo,
+            "marca": self.marca,
+            "placa": self.placa,
+            "ano": self.ano,
+            "categoria": self.categoria,
+            "quilometragem": self.quilometragem
+        }
 
-    id_cliente = Column(Integer, primary_key=True, autoincrement=True)
-    nome = Column(String(100), nullable=False)
-    cpf = Column(String(11), unique=True, nullable=False)
-    telefone = Column(String(15))
-    email = Column(String(100))
-    endereco = Column(String(200))
+class Agencia:
+    def __init__(self, id_agencia=None, nome=None, cidade=None, endereco=None, telefone=None):
+        self.id_agencia = id_agencia
+        self.nome = nome
+        self.cidade = cidade
+        self.endereco = endereco
+        self.telefone = telefone
+    
+    def to_dict(self):
+        return {
+            "id_agencia": self.id_agencia,
+            "nome": self.nome,
+            "cidade": self.cidade,
+            "endereco": self.endereco,
+            "telefone": self.telefone
+        }
 
-    contratos = relationship("Contrato", back_populates="cliente")
+class Funcionario:
+    def __init__(self, id_funcionario=None, nome=None, cpf=None, cargo=None, salario=None, id_agencia=None):
+        self.id_funcionario = id_funcionario
+        self.nome = nome
+        self.cpf = cpf
+        self.cargo = cargo
+        self.salario = salario
+        self.id_agencia = id_agencia
+    
+    def to_dict(self):
+        return {
+            "id_funcionario": self.id_funcionario,
+            "nome": self.nome,
+            "cpf": self.cpf,
+            "cargo": self.cargo,
+            "salario": self.salario,
+            "id_agencia": self.id_agencia
+        }
 
-    def __repr__(self):
-        return f"<Cliente(id_cliente={self.id_cliente}, nome='{self.nome}', cpf='{self.cpf}', telefone='{self.telefone}', email='{self.email}', endereco='{self.endereco}')>"
+class Contrato:
+    def __init__(self, id_contrato=None, data_inicio=None, data_fim=None, valor_total=None, id_cliente=None, id_agencia=None, id_carro=None):
+        self.id_contrato = id_contrato
+        self.data_inicio = data_inicio
+        self.data_fim = data_fim
+        self.valor_total = valor_total
+        self.id_cliente = id_cliente
+        self.id_agencia = id_agencia
+        self.id_carro = id_carro
+    
+    def to_dict(self):
+        return {
+            "id_contrato": self.id_contrato,
+            "data_inicio": self.data_inicio,
+            "data_fim": self.data_fim,
+            "valor_total": self.valor_total,
+            "id_cliente": self.id_cliente,
+            "id_agencia": self.id_agencia,
+            "id_carro": self.id_carro
+        }
 
-class Carro(Base):
-    __tablename__ = "carros"
-
-    id_carro = Column(Integer, primary_key=True, autoincrement=True)
-    modelo = Column(String(50), nullable=False)  # Modelo do carro
-    marca = Column(String(50), nullable=False)  # Marca do carro
-    placa = Column(String(7), unique=True, nullable=False)  # Placa do carro
-    ano = Column(Integer)
-    categoria = Column(String(50))  # Categoria do carro
-    quilometragem = Column(Integer)
-
-    manutencoes = relationship("Manutencao", back_populates="carro")
-    contratos = relationship("Contrato", back_populates="carro")
-
-class Agencia(Base):
-    __tablename__ = "agencias"
-
-    id_agencia = Column(Integer, primary_key=True, autoincrement=True)
-    nome = Column(String(100), nullable=False)  # Nome da agência
-    cidade = Column(String(100), nullable=False)  # Cidade da agência
-    endereco = Column(String(200), nullable=False)  # Endereço da agência
-    telefone = Column(String(15))  # Telefone da agência
-
-    funcionarios = relationship("Funcionario", back_populates="agencia")
-    contratos = relationship("Contrato", back_populates="agencia")
-
-class Funcionario(Base):
-    __tablename__ = "funcionarios"
-
-    id_funcionario = Column(Integer, primary_key=True, autoincrement=True)
-    nome = Column(String(100), nullable=False)  # Nome do funcionário
-    cpf = Column(String(11), unique=True, nullable=False)  # CPF do funcionário
-    cargo = Column(String(50))  # Cargo do funcionário
-    salario = Column(Float)
-    id_agencia = Column(Integer, ForeignKey("agencias.id_agencia"))
-
-    agencia = relationship("Agencia", back_populates="funcionarios")
-
-class Contrato(Base):
-    __tablename__ = "contratos"
-
-    id_contrato = Column(Integer, primary_key=True, autoincrement=True)
-    data_inicio = Column(Date)
-    data_fim = Column(Date)
-    valor_total = Column(Float)
-    id_cliente = Column(Integer, ForeignKey("clientes.id_cliente"))
-    id_agencia = Column(Integer, ForeignKey("agencias.id_agencia"))
-    id_carro = Column(Integer, ForeignKey("carros.id_carro"))
-
-    cliente = relationship("Cliente", back_populates="contratos")
-    agencia = relationship("Agencia", back_populates="contratos")
-    carro = relationship("Carro", back_populates="contratos")
-
-class Manutencao(Base):
-    __tablename__ = "manutencoes"
-
-    id_manutencao = Column(Integer, primary_key=True, autoincrement=True)
-    id_carro = Column(Integer, ForeignKey("carros.id_carro"))
-    descricao = Column(String(200))  # Descrição da manutenção
-    data = Column(Date)
-    custo = Column(Float)
-
-    carro = relationship("Carro", back_populates="manutencoes")
+class Manutencao:
+    def __init__(self, id_manutencao=None, id_carro=None, descricao=None, data=None, custo=None):
+        self.id_manutencao = id_manutencao
+        self.id_carro = id_carro
+        self.descricao = descricao
+        self.data = data
+        self.custo = custo
+    
+    def to_dict(self):
+        return {
+            "id_manutencao": self.id_manutencao,
+            "id_carro": self.id_carro,
+            "descricao": self.descricao,
+            "data": self.data,
+            "custo": self.custo
+        }
