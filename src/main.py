@@ -1,7 +1,15 @@
+from database import engine, SessionLocal, Base
 from models import Cliente, Carro, Agencia, Funcionario, Contrato, Manutencao
 from repository import Repositorio
+from popula_bd import popular_banco  # Importa a função de popular o banco
+
+# Criar as tabelas no banco de dados
+Base.metadata.create_all(bind=engine)
 
 repo = Repositorio()
+
+# Popular as tabelas com os dados iniciais
+popular_banco()
 
 def input_int(mensagem):
     """Solicita um número inteiro do usuário e trata erro de entrada."""
@@ -47,59 +55,57 @@ def menu():
         print("23. Remover Contrato")
         print("24. Remover Manutenção")
         print("0. Sair")
-        
+        print("------------------------------------")
+
         opcao = input("Escolha uma opção: ")
 
         #  1. Cadastrar Cliente
         if opcao == "1":
-            id_cliente = len(repo.clientes) + 1
             nome = input("Nome: ")
             cpf = input("CPF: ")
             telefone = input("Telefone: ")
             email = input("Email: ")
             endereco = input("Endereço: ")
-            cliente = Cliente(id_cliente, nome, cpf, telefone, email, endereco)
+            cliente = Cliente(nome=nome, cpf=cpf, telefone=telefone, email=email, endereco=endereco)
             repo.adicionar(cliente)
+
 
         #  2. Cadastrar Carro
         elif opcao == "2":
-            id_carro = len(repo.carros) + 1
             modelo = input("Modelo: ")
             marca = input("Marca: ")
             placa = input("Placa: ")
             ano = input_int("Ano: ")
             categoria = input("Categoria: ")
             quilometragem = input_int("Quilometragem: ")
-            carro = Carro(id_carro, modelo, marca, placa, ano, categoria, quilometragem)
+            carro = Carro(modelo=modelo, marca=marca, placa=placa, ano=ano, categoria=categoria, quilometragem=quilometragem)
             repo.adicionar(carro)
 
         #  3. Cadastrar Agência
         elif opcao == "3":
-            id_agencia = len(repo.agencias) + 1
             nome = input("Nome da Agência: ")
             cidade = input("Cidade: ")
             endereco = input("Endereço: ")
             telefone = input("Telefone: ")
-            agencia = Agencia(id_agencia, nome, cidade, endereco, telefone)
+            agencia = Agencia(nome=nome, cidade=cidade, endereco=endereco, telefone=telefone)
             repo.adicionar(agencia)
 
         #  4. Cadastrar Funcionário
         elif opcao == "4":
-            id_funcionario = len(repo.funcionarios) + 1
             nome = input("Nome: ")
             cpf = input("CPF: ")
             cargo = input("Cargo: ")
             salario = input_float("Salário: ")
             id_agencia = input_int("ID da Agência: ")
-            agencia = next((a for a in repo.agencias if a.id_agencia == id_agencia), None)
+            agencia = next((a for a in repo.listar("agencia") if a.id_agencia == id_agencia), None)
             if agencia:
-                funcionario = Funcionario(id_funcionario, nome, cpf, cargo, salario, id_agencia)
+                funcionario = Funcionario(nome=nome, cpf=cpf, cargo=cargo, salario=salario, id_agencia=id_agencia)
                 repo.adicionar(funcionario)
             else:
                 print("Erro: Agência não encontrada. Funcionário não cadastrado.")
 
+        #  5. Cadastrar Contrato
         elif opcao == "5":
-            id_contrato = len(repo.contratos) + 1
             data_inicio = input("Data de Início (YYYY-MM-DD): ")
             data_fim = input("Data de Fim (YYYY-MM-DD): ")
             valor_total = input_float("Valor Total: ")
@@ -107,30 +113,29 @@ def menu():
             id_agencia = input_int("ID da Agência: ")
             id_carro = input_int("ID do Carro: ")
             
-            cliente = next((c for c in repo.clientes if c.id_cliente == id_cliente), None)
-            agencia = next((a for a in repo.agencias if a.id_agencia == id_agencia), None)
-            carro = next((c for c in repo.carros if c.id_carro == id_carro), None)
+            cliente = next((c for c in repo.listar("cliente") if c.id_cliente == id_cliente), None)
+            agencia = next((a for a in repo.listar("agencia") if a.id_agencia == id_agencia), None)
+            carro = next((c for c in repo.listar("carro") if c.id_carro == id_carro), None)
 
             if cliente and agencia and carro:
-                contrato = Contrato(id_contrato, data_inicio, data_fim, valor_total, cliente, agencia, carro)
+                contrato = Contrato(data_inicio=data_inicio, data_fim=data_fim, valor_total=valor_total, cliente=cliente, agencia=agencia, carro=carro)
                 repo.adicionar(contrato)
             else:
                 print("Erro: Cliente, Agência ou Carro não encontrados.")
 
+        #  6. Cadastrar Manutenção
         elif opcao == "6":
-            id_manutencao = len(repo.manutencoes) + 1
             id_carro = input_int("ID do Carro: ")
             descricao = input("Descrição: ")
             data = input("Data (YYYY-MM-DD): ")
             custo = input_float("Custo: ")
             
-            carro = next((c for c in repo.carros if c.id_carro == id_carro), None)
+            carro = next((c for c in repo.listar("carro") if c.id_carro == id_carro), None)
             if carro:
-                manutencao = Manutencao(id_manutencao, carro, descricao, data, custo)
+                manutencao = Manutencao(carro=carro, descricao=descricao, data=data, custo=custo)
                 repo.adicionar(manutencao)
             else:
                 print("Erro: Carro não encontrado.")
-
 
         #  7-12. Listar Registros
         elif opcao == "7":
@@ -226,15 +231,14 @@ def menu():
             id_manutencao = input_int("Digite o ID da manutenção a remover: ")
             repo.remover("manutencao", id_manutencao)
 
-
-
         #  0. Sair
         elif opcao == "0":
             print("Saindo do sistema...")
             break
 
         else:
-            print("Opção inválida. Tente novamente.")
+            print("Opção inválida, tente novamente.")
+
 
 if __name__ == "__main__":
     menu()

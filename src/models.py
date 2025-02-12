@@ -1,83 +1,82 @@
-class Cliente:
-    def __init__(self, id_cliente, nome, cpf, telefone, email, endereco):
-        self.id_cliente = id_cliente
-        self.nome = nome
-        self.cpf = cpf
-        self.telefone = telefone
-        self.email = email
-        self.endereco = endereco
-        self.contratos = []  # Um cliente pode ter vários contratos
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, Date
+from sqlalchemy.orm import relationship
+from database import Base
 
-    def adicionar_contrato(self, contrato):
-        self.contratos.append(contrato)
+class Cliente(Base):
+    __tablename__ = "clientes"
 
-    def __repr__(self):
-        return f"Cliente({self.id_cliente}, {self.nome}, {self.cpf})"
+    id_cliente = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(100), nullable=False)
+    cpf = Column(String(50), unique=True, nullable=False)
+    telefone = Column(String(15))
+    email = Column(String(100))
+    endereco = Column(String(200))
 
-class Carro:
-    def __init__(self, id_carro, modelo, marca, placa, ano, categoria, quilometragem):
-        self.id_carro = id_carro
-        self.modelo = modelo
-        self.marca = marca
-        self.placa = placa
-        self.ano = ano
-        self.categoria = categoria
-        self.quilometragem = quilometragem
-        self.manutencoes = []  # Um carro pode ter várias manutenções
-
-    def adicionar_manutencao(self, manutencao):
-        self.manutencoes.append(manutencao)
+    contratos = relationship("Contrato", back_populates="cliente")
 
     def __repr__(self):
-        return f"Carro({self.id_carro}, {self.modelo}, {self.placa})"
+        return f"<Cliente(id_cliente={self.id_cliente}, nome='{self.nome}', cpf='{self.cpf}', telefone='{self.telefone}', email='{self.email}', endereco='{self.endereco}')>"
 
-class Agencia:
-    def __init__(self, id_agencia, nome, cidade, endereco, telefone):
-        self.id_agencia = id_agencia
-        self.nome = nome
-        self.cidade = cidade
-        self.endereco = endereco
-        self.telefone = telefone
-        self.funcionarios = []  # Uma agência pode ter vários funcionários
+class Carro(Base):
+    __tablename__ = "carros"
 
-    def adicionar_funcionario(self, funcionario):
-        self.funcionarios.append(funcionario)
+    id_carro = Column(Integer, primary_key=True, autoincrement=True)
+    modelo = Column(String(50), nullable=False)  # Modelo do carro
+    marca = Column(String(50), nullable=False)  # Marca do carro
+    placa = Column(String(7), unique=True, nullable=False)  # Placa do carro
+    ano = Column(Integer)
+    categoria = Column(String(50))  # Categoria do carro
+    quilometragem = Column(Integer)
 
-    def __repr__(self):
-        return f"Agencia({self.id_agencia}, {self.nome})"
+    manutencoes = relationship("Manutencao", back_populates="carro")
+    contratos = relationship("Contrato", back_populates="carro")
 
-class Funcionario:
-    def __init__(self, id_funcionario, nome, cpf, cargo, salario, id_agencia):
-        self.id_funcionario = id_funcionario
-        self.nome = nome
-        self.cpf = cpf
-        self.cargo = cargo
-        self.salario = salario
-        self.id_agencia = id_agencia
+class Agencia(Base):
+    __tablename__ = "agencias"
 
-    def __repr__(self):
-        return f"Funcionario({self.id_funcionario}, {self.nome}, {self.cargo})"
+    id_agencia = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(100), nullable=False)  # Nome da agência
+    cidade = Column(String(100), nullable=False)  # Cidade da agência
+    endereco = Column(String(200), nullable=False)  # Endereço da agência
+    telefone = Column(String(15))  # Telefone da agência
 
-class Contrato:
-    def __init__(self, id_contrato, data_inicio, data_fim, valor_total, cliente, agencia, carro):
-        self.id_contrato = id_contrato
-        self.data_inicio = data_inicio
-        self.data_fim = data_fim
-        self.valor_total = valor_total
-        self.cliente = cliente
-        self.agencia = agencia
-        self.carro = carro
+    funcionarios = relationship("Funcionario", back_populates="agencia")
+    contratos = relationship("Contrato", back_populates="agencia")
 
-    def __repr__(self):
-        return f"Contrato({self.id_contrato}, Cliente: {self.cliente.nome}, Carro: {self.carro.modelo})"
+class Funcionario(Base):
+    __tablename__ = "funcionarios"
 
-class Manutencao:
-    def __init__(self, id_manutencao, carro, descricao, data, custo):
-        self.id_manutencao = id_manutencao
-        self.carro = carro
-        self.descricao = descricao
-        self.data = data
-        self.custo = custo
+    id_funcionario = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(100), nullable=False)  # Nome do funcionário
+    cpf = Column(String(11), unique=True, nullable=False)  # CPF do funcionário
+    cargo = Column(String(50))  # Cargo do funcionário
+    salario = Column(Float)
+    id_agencia = Column(Integer, ForeignKey("agencias.id_agencia"))
 
-    def __repr__(self):
-        return f"Manutencao({self.id_manutencao}, Carro: {self.carro.modelo})"
+    agencia = relationship("Agencia", back_populates="funcionarios")
+
+class Contrato(Base):
+    __tablename__ = "contratos"
+
+    id_contrato = Column(Integer, primary_key=True, autoincrement=True)
+    data_inicio = Column(Date)
+    data_fim = Column(Date)
+    valor_total = Column(Float)
+    id_cliente = Column(Integer, ForeignKey("clientes.id_cliente"))
+    id_agencia = Column(Integer, ForeignKey("agencias.id_agencia"))
+    id_carro = Column(Integer, ForeignKey("carros.id_carro"))
+
+    cliente = relationship("Cliente", back_populates="contratos")
+    agencia = relationship("Agencia", back_populates="contratos")
+    carro = relationship("Carro", back_populates="contratos")
+
+class Manutencao(Base):
+    __tablename__ = "manutencoes"
+
+    id_manutencao = Column(Integer, primary_key=True, autoincrement=True)
+    id_carro = Column(Integer, ForeignKey("carros.id_carro"))
+    descricao = Column(String(200))  # Descrição da manutenção
+    data = Column(Date)
+    custo = Column(Float)
+
+    carro = relationship("Carro", back_populates="manutencoes")
