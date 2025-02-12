@@ -7,21 +7,10 @@ class Repositorio:
 
     def adicionar(self, objeto):
         """Adiciona um objeto ao banco de dados."""
-    #    try:
         self.db.add(objeto)
         self.db.commit()
         self.db.refresh(objeto)
 
-            # Verifique se o objeto foi realmente adicionado
- #           added_objeto = self.db.query(objeto.__class__).filter_by(id=objeto.id).first()
-  #          if added_objeto:
-   #             print(f"{objeto.__class__.__name__} adicionado com sucesso!")
-     #       else:
-      #          print(f"Erro ao adicionar {objeto.__class__.__name__}")
-       # except Exception as e:
-        #    self.db.rollback()
-         #   print(f"Erro ao adicionar {objeto.__class__.__name__}: {e}")
-          #  raise
 
     def listar(self, tipo):
         """Lista objetos do banco de dados."""

@@ -7,7 +7,7 @@ class Cliente(Base):
 
     id_cliente = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String(100), nullable=False)
-    cpf = Column(String(50), unique=True, nullable=False)
+    cpf = Column(String(11), unique=True, nullable=False)
     telefone = Column(String(15))
     email = Column(String(100))
     endereco = Column(String(200))

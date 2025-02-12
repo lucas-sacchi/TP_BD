@@ -5,7 +5,7 @@ from models import Cliente, Carro, Agencia, Funcionario, Contrato, Manutencao
 def popular_banco():
     repo = Repositorio()
 
-    # Dados de exemplo para popular as tabelas
+    # Dados de exemplo para popular as tabelas criadas.
     clientes = [
         Cliente( nome="João Silva", cpf="12345678900", telefone="987654321", email="joao.silva@gmail.com", endereco="Rua A, 123"),
         Cliente( nome="Maria Oliveira", cpf="23456789011", telefone="912345678", email="maria.oliveira@gmail.com", endereco="Avenida B, 456"),
