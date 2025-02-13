@@ -107,7 +107,6 @@ A estrutura do projeto está organizada da seguinte maneira:
 ├── models.py        # Definição das classes ORM
 ├── repository.py    # Classe de repositório para acesso ao banco
 ├── popula_bd.py     # Popula o banco de dados com dados iniciais
-├── .env             # Arquivo de variáveis de ambiente
 ├── requirements.txt # Lista de dependências do projeto
 ```
 
