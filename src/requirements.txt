@@ -2,6 +2,5 @@
 # Para compatibilidade com o codigo é preciso instalar as seguintes bibliotecas:
 
 mysql-connector-python==9.2.0
-SQLAlchemy==2.0.38
 
 # Utilize o comando pip install -r requirements.txt
