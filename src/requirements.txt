@@ -1,6 +1,7 @@
 
 # Para compatibilidade com o codigo é preciso instalar as seguintes bibliotecas:
+# Utilize o comando pip install -r requirements.txt
 
 mysql-connector-python==9.2.0
+dotenv==0.0.5
 
-# Utilize o comando pip install -r requirements.txt
