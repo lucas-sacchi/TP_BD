@@ -1,5 +1,5 @@
 # TP_BD
-# README - Sistema de Gestão de Locadora de Carros
+# Gestão de Locadora de Carros
 
 ## Índice
 1. [Descrição do Projeto](#descricao-do-projeto)
